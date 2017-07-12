@@ -10,6 +10,12 @@ import UIKit
 import GoogleMaps
 import GooglePlaces
 
+struct Constants {
+    static let mapsApiKey = "AIzaSyBnAqb9hVBFrdDXy7eoFfrj1isElbtol_A"
+    static let placesSdkKey = "AIzaSyB5BReaIMsndLxYcK27OtUWG6fRacZl3lk"
+    static let placesApiKey = "AIzaSyAs8fBHu7G8qzxe4wzRQYqQIH6DVrgjKkY"
+}
+
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
@@ -19,8 +25,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         
-        GMSServices.provideAPIKey("AIzaSyBnAqb9hVBFrdDXy7eoFfrj1isElbtol_A")
-        GMSPlacesClient.provideAPIKey("AIzaSyB5BReaIMsndLxYcK27OtUWG6fRacZl3lk")
+        GMSServices.provideAPIKey(Constants.mapsApiKey)
+        GMSPlacesClient.provideAPIKey(Constants.placesSdkKey)
         
         return true
     }

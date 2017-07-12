@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12121" systemVersion="16F73" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12121" systemVersion="16F2073" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -21,33 +21,34 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="47" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="BGy-ii-Rfn">
-                                <rect key="frame" x="10" y="85" width="355" height="572"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="singleLineEtched" rowHeight="40" sectionHeaderHeight="1" sectionFooterHeight="1" translatesAutoresizingMaskIntoConstraints="NO" id="BGy-ii-Rfn">
+                                <rect key="frame" x="10" y="85" width="355" height="200"/>
+                                <color key="backgroundColor" white="0.33333333333333331" alpha="0.84999999999999998" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="200" id="mK8-1K-8Dt"/>
+                                </constraints>
+                                <inset key="scrollIndicatorInsets" minX="0.0" minY="10" maxX="0.0" maxY="0.0"/>
+                                <color key="separatorColor" white="0.35999999999999999" alpha="0.50371368838028174" colorSpace="calibratedWhite"/>
                                 <prototypes>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="addressCell" textLabel="9Qt-aY-Dpe" detailTextLabel="QNO-5y-Y9y" rowHeight="47" style="IBUITableViewCellStyleSubtitle" id="cbb-sS-DtZ" customClass="AddressCell" customModule="Lunch" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="28" width="355" height="47"/>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationWidth="0.0" reuseIdentifier="addressCell" textLabel="9Qt-aY-Dpe" rowHeight="40" style="IBUITableViewCellStyleDefault" id="cbb-sS-DtZ" customClass="AddressCell" customModule="Lunch" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="1" width="355" height="40"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="cbb-sS-DtZ" id="bH2-5d-gVu">
-                                            <rect key="frame" x="0.0" y="0.0" width="355" height="46.5"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="355" height="39.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="9Qt-aY-Dpe">
-                                                    <rect key="frame" x="15" y="6" width="32" height="20"/>
+                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Title" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsLetterSpacingToFitWidth="YES" adjustsFontSizeToFit="NO" id="9Qt-aY-Dpe">
+                                                    <rect key="frame" x="15" y="0.0" width="325" height="39.5"/>
                                                     <autoresizingMask key="autoresizingMask"/>
-                                                    <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="17"/>
-                                                    <nil key="textColor"/>
-                                                    <nil key="highlightedColor"/>
-                                                </label>
-                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Subtitle" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="QNO-5y-Y9y">
-                                                    <rect key="frame" x="15" y="26" width="39" height="14.5"/>
-                                                    <autoresizingMask key="autoresizingMask"/>
-                                                    <fontDescription key="fontDescription" name="HelveticaNeue-Light" family="Helvetica Neue" pointSize="12"/>
-                                                    <nil key="textColor"/>
+                                                    <fontDescription key="fontDescription" name="HelveticaNeue-Light" family="Helvetica Neue" pointSize="18"/>
+                                                    <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                             </subviews>
+                                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </tableViewCellContentView>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                        <inset key="separatorInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                     </tableViewCell>
                                 </prototypes>
                                 <userDefinedRuntimeAttributes>
@@ -64,27 +65,26 @@
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <gestureRecognizers/>
                         <constraints>
-                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="BGy-ii-Rfn" secondAttribute="bottom" constant="10" id="Tef-Xd-Bm4"/>
                             <constraint firstAttribute="trailing" secondItem="BGy-ii-Rfn" secondAttribute="trailing" constant="10" id="Vqf-c0-BnU"/>
                             <constraint firstItem="BGy-ii-Rfn" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="10" id="tm6-65-BGb"/>
                             <constraint firstItem="BGy-ii-Rfn" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="65" id="vLv-Dv-wsx"/>
                         </constraints>
-                        <connections>
-                            <outletCollection property="gestureRecognizers" destination="0xx-Mp-ZfW" appends="YES" id="tNk-W3-JNw"/>
-                        </connections>
                     </view>
                     <connections>
+                        <outlet property="searchDisplayController" destination="mcu-hz-8k0" id="REb-Uo-07n"/>
                         <outlet property="tableView" destination="BGy-ii-Rfn" id="zRK-dC-IGz"/>
-                        <outlet property="tableViewBottomLayoutConstraint" destination="Tef-Xd-Bm4" id="LJQ-PG-Tqg"/>
                         <segue destination="Oc9-ct-UuU" kind="presentation" identifier="showResturants" modalPresentationStyle="overCurrentContext" modalTransitionStyle="coverVertical" id="mwE-dc-6V7"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
-                <tapGestureRecognizer id="0xx-Mp-ZfW">
+                <searchDisplayController id="mcu-hz-8k0">
                     <connections>
-                        <action selector="dismissKeyboard:" destination="BYZ-38-t0r" id="64J-4V-AeJ"/>
+                        <outlet property="delegate" destination="BYZ-38-t0r" id="rAI-5z-Dks"/>
+                        <outlet property="searchContentsController" destination="BYZ-38-t0r" id="8tw-28-QYS"/>
+                        <outlet property="searchResultsDataSource" destination="BYZ-38-t0r" id="1Wq-5t-P02"/>
+                        <outlet property="searchResultsDelegate" destination="BYZ-38-t0r" id="I50-la-uzb"/>
                     </connections>
-                </tapGestureRecognizer>
+                </searchDisplayController>
             </objects>
             <point key="canvasLocation" x="136.80000000000001" y="138.98050974512745"/>
         </scene>

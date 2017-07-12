@@ -18,13 +18,11 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
     var placesClient: GMSPlacesClient!
     var zoomLevel: Float = 15.0
     
-    // An array to hold the list of likely places.
-    var likelyPlaces: [GMSPlace] = []
-    
-    var tableDataSource: GMSAutocompleteTableDataSource?
+    var likelyPlaces: [GMSAutocompletePrediction] = []
     
     // The currently selected place.
     var selectedPlace: GMSPlace?
+    var nearbyRestaurants = [Restaurant]()
     
     let defaultLocation = CLLocation(latitude: -33.869405, longitude: 151.199)
     
@@ -34,8 +32,6 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
     var dismissTapView : UIView?
     
     @IBOutlet var tableView: UITableView!
-    @IBOutlet var tableViewBottomLayoutConstraint: NSLayoutConstraint!
-    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -60,9 +56,6 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
     
     func setupSearch() {
         
-        tableDataSource = GMSAutocompleteTableDataSource()
-        tableDataSource?.delegate = self
-        
         filterButton = UIButton(type: .system)
         filterButton?.frame = CGRect(x: view.frame.width - 58, y: 24, width: 38, height: 48)
         filterButton?.setImage(UIImage(named: "filter"), for: .normal)
@@ -86,7 +79,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
             NSFontAttributeName : UIFont(name: "AppleSDGothicNeo-UltraLight", size: 22)!
         ]
         
-        searchTextField?.attributedPlaceholder = NSAttributedString(string: "Search for something delicious!", attributes:attributes)
+        searchTextField?.font = UIFont(name: "AppleSDGothicNeo-Regular", size: 22)!
+        searchTextField?.attributedPlaceholder = NSAttributedString(string: "Search Resturants Nearby!", attributes:attributes)
         
         view.insertSubview(searchTextField!, aboveSubview: view)
         view.insertSubview(filterButton!, aboveSubview: searchTextField!)
@@ -132,46 +126,29 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
             
             view.insertSubview(mapView, at: 0)
             mapView.isHidden = true
-            
-            listLikelyPlaces()
         }
-    }
-    
-    func listLikelyPlaces() {
-        
-        // Clean up from previous sessions.
-        likelyPlaces.removeAll()
-        
-        placesClient.currentPlace(callback: { (placeLikelihoods, error) in
-            if let error = error {
-                print("\(error.localizedDescription)")
-                return
-            }
-            
-            // Get likely places and add to the list.
-            if let likelihoodList = placeLikelihoods {
-                for likelihood in likelihoodList.likelihoods {
-                    let place = likelihood.place
-                    self.likelyPlaces.append(place)
-                }
-            }
-        })
     }
     
     //  MARK:   UITextField Delegate
     
     func textFieldDidBeginEditing(_ textField: UITextField) {
-            
-        DispatchQueue.main.async {
-            self.tableView.isHidden = false
-            self.tableView.reloadData()
-            //self.addDismissView()
-        }
+
     }
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        tableDataSource?.sourceTextHasChanged(string)
+        placeAutocomplete(query: textField.text! + string)
         return true
+    }
+    
+    func updateSearchResultsView() {
+        DispatchQueue.main.async {
+            if self.likelyPlaces.count > 0 {
+                self.tableView.isHidden = false
+                self.tableView.reloadData()
+            } else {
+                self.tableView.isHidden = true
+            }
+        }
     }
     
     func showFilter() {
@@ -211,13 +188,52 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
     //  MARK:   UITableView Data Source & Delegate
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
         let cell = tableView.dequeueReusableCell(withIdentifier: "addressCell", for: indexPath) as! AddressCell
+        
         let place = likelyPlaces[indexPath.row]
         
-        cell.textLabel?.text = place.name
-        cell.detailTextLabel?.text = place.formattedAddress
+        let regularFont = UIFont(name: "AppleSDGothicNeo-UltraLight", size: 20)!
+        let boldFont = UIFont(name: "AppleSDGothicNeo-Medium", size: 20)!
+        
+        let bolded = place.attributedFullText.mutableCopy() as! NSMutableAttributedString
+        bolded.enumerateAttribute(kGMSAutocompleteMatchAttribute, in: NSMakeRange(0, bolded.length), options: []) {
+            (value, range: NSRange, stop: UnsafeMutablePointer<ObjCBool>) -> Void in
+            let font = (value == nil) ? regularFont : boldFont
+            bolded.addAttribute(NSFontAttributeName, value: font, range: range)
+        }
+        
+        cell.textLabel?.attributedText = bolded
         
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let predictedPlace = likelyPlaces[indexPath.row]
+        searchTextField?.attributedText = predictedPlace.attributedPrimaryText
+        tableView.isHidden = true
+        
+        GMSPlacesClient.shared().lookUpPlaceID(predictedPlace.placeID!) { (place, err) in
+            
+            self.selectedPlace = place
+            self.mapView.animate(toLocation: place!.coordinate)
+            
+            let options = [
+                "latitude": place!.coordinate.latitude,
+                "longitude": place!.coordinate.longitude,
+                "radius": Int(1000) // METERS
+            ] as [String : Any]
+            
+            Restaurant.searchNearby(options: options, success: { (results) in
+                
+                print(results)
+                
+            }, failure: { (error, reason) in
+                print(error, reason)
+            })
+            
+            print("user selected place: \(place!.formattedAddress!)")
+        }
     }
 
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -234,21 +250,11 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
         keyboard
             .on(event: .willChangeFrame) { (options) in
                 
-                DispatchQueue.main.async {
-                    UIView.animate(withDuration: 0.25, animations: {
-                        self.tableViewBottomLayoutConstraint.constant += options.endFrame.height
-                    })
-                }
                 
                 print("New Keyboard Frame is \(options.endFrame).")
             }
             .on(event: .willHide) { (options) in
                 
-                DispatchQueue.main.async {
-                    UIView.animate(withDuration: 0.25, animations: {
-                        self.tableViewBottomLayoutConstraint.constant = 10
-                    })
-                }
 
                 print("It took \(options.animationDuration) seconds to animate keyboard out.")
             }
@@ -257,69 +263,74 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
     
     //  MARK: GMSMapViewDelegate Methods
     
-    func mapView(_ mapView: GMSMapView, willMove gesture: Bool) {
-        DispatchQueue.main.async {
-            var searchFrame = self.searchTextField?.frame
-            searchFrame?.origin.y = -30
-            UIView.animate(withDuration: 0.25, animations: { 
-                self.searchTextField?.frame = searchFrame!
-            })
-        }
-    }
-    
-    
-    func mapView(_ mapView: GMSMapView, idleAt position: GMSCameraPosition) {
-        DispatchQueue.main.async {
-            var searchFrame = self.searchTextField?.frame
-            searchFrame?.origin.y = 20
-            UIView.animate(withDuration: 0.25, animations: {
-                self.searchTextField?.frame = searchFrame!
-            })
-        }
-    }
-    
+//    func mapView(_ mapView: GMSMapView, willMove gesture: Bool) {
+//        DispatchQueue.main.async {
+//            var searchFrame = self.searchTextField?.frame
+//            searchFrame?.origin.y = -30
+//            UIView.animate(withDuration: 0.25, animations: { 
+//                self.searchTextField?.frame = searchFrame!
+//            })
+//        }
+//    }
+//    
+//    
+//    func mapView(_ mapView: GMSMapView, idleAt position: GMSCameraPosition) {
+//        DispatchQueue.main.async {
+//            var searchFrame = self.searchTextField?.frame
+//            searchFrame?.origin.y = 20
+//            UIView.animate(withDuration: 0.25, animations: {
+//                self.searchTextField?.frame = searchFrame!
+//            })
+//        }
+//    }
+//    
     func mapViewSnapshotReady(_ mapView: GMSMapView) {
         mapView.delegate = self
     }
     
     //  MARK: GMSAutocompleteTableDataSource Methods
     
-    func didUpdateAutocompletePredictionsForTableDataSource(tableDataSource: GMSAutocompleteTableDataSource) {
-        // Turn the network activity indicator off.
-        UIApplication.shared.isNetworkActivityIndicatorVisible = false
-        // Reload table data.
-        tableView.reloadData()
+    func getNearbyPlaces() {
+        let filter = GMSAutocompleteFilter()
+        filter.type = .region
     }
     
-    func didRequestAutocompletePredictionsForTableDataSource(tableDataSource: GMSAutocompleteTableDataSource) {
-        // Turn the network activity indicator on.
-        UIApplication.shared.isNetworkActivityIndicatorVisible = true
-        // Reload table data.
-        tableView.reloadData()
+    func placeAutocomplete(query : String) {
+        let filter = GMSAutocompleteFilter()
+        filter.type = .noFilter
+        
+        placesClient.autocompleteQuery(query, bounds: nil, filter: filter, callback: {(results, error) -> Void in
+            if let error = error {
+                print("Autocomplete error \(error)")
+                return
+            }
+            if let results = results {
+                self.likelyPlaces = results
+                
+                DispatchQueue.main.async {
+                    
+                    self.updateSearchResultsView()
+
+                    let newHeight = Int(self.tableView.rowHeight) * self.likelyPlaces.count
+                    
+                    let newFrame = CGRect(x: self.tableView.frame.origin.x, y: self.tableView.frame.origin.y, width: self.tableView.frame.width, height: CGFloat(newHeight))
+                    
+                    UIView.animate(withDuration: 0.0, animations: {
+                        self.tableView.frame = newFrame
+                    })
+                }
+                
+                for result in results {
+                    print("Result \(result.attributedFullText) with placeID \(String(describing: result.placeID))")
+                }
+            }
+        })
     }
     
     //  MARK: Segue Methods
     
     @IBAction func dismissToMap(segue : UIStoryboardSegue) {
         print("back to map")
-    }
-}
-
-extension ViewController: GMSAutocompleteTableDataSourceDelegate {
-    func tableDataSource(_ tableDataSource: GMSAutocompleteTableDataSource, didAutocompleteWith place: GMSPlace) {
-        // Do something with the selected place.
-        print("Place name: \(place.name)")
-        print("Place address: \(String(describing: place.formattedAddress))")
-        print("Place attributions: \(String(describing: place.attributions))")
-    }
-    
-    func tableDataSource(_ tableDataSource: GMSAutocompleteTableDataSource, didFailAutocompleteWithError error: Error) {
-        // TODO: Handle the error.
-        print("Error: \(error)")
-    }
-    
-    func tableDataSource(_ tableDataSource: GMSAutocompleteTableDataSource, didSelect prediction: GMSAutocompletePrediction) -> Bool {
-        return true
     }
 }
 
@@ -331,6 +342,8 @@ extension ViewController: CLLocationManagerDelegate {
         let location: CLLocation = locations.last!
         print("Location: \(location)")
         
+        self.currentLocation = location
+        
         let camera = GMSCameraPosition.camera(withLatitude: location.coordinate.latitude,
                                               longitude: location.coordinate.longitude,
                                               zoom: zoomLevel)
@@ -341,8 +354,6 @@ extension ViewController: CLLocationManagerDelegate {
         } else {
             mapView.animate(to: camera)
         }
-        
-        listLikelyPlaces()
     }
     
     // Handle authorization for the location manager.
