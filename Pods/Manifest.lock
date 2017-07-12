@@ -1,0 +1,23 @@
+PODS:
+  - GoogleMaps (2.3.0):
+    - GoogleMaps/Maps (= 2.3.0)
+  - GoogleMaps/Base (2.3.0)
+  - GoogleMaps/Maps (2.3.0):
+    - GoogleMaps/Base
+  - GooglePlaces (2.3.0):
+    - GoogleMaps/Base (= 2.3.0)
+  - SwiftCharts (0.6)
+
+DEPENDENCIES:
+  - GoogleMaps
+  - GooglePlaces
+  - SwiftCharts (~> 0.6)
+
+SPEC CHECKSUMS:
+  GoogleMaps: 340a6a0bebd17c2db8abcd3921976c7c53c86cb8
+  GooglePlaces: 74d322c74184ea4576184089b496d291cf0dcd38
+  SwiftCharts: d8e6d60679bc982f48f8bea25cf5c1b94fcfec4f
+
+PODFILE CHECKSUM: c3ea22b96c9fe8e357d5f0b5cd8069669bf24eb6
+
+COCOAPODS: 1.3.0.beta.1

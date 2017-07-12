@@ -1,0 +1,6 @@
+framework module Pods_LunchTests {
+  umbrella header "Pods-LunchTests-umbrella.h"
+
+  export *
+  module * { export * }
+}
