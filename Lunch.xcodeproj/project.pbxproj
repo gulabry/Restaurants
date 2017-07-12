@@ -9,7 +9,9 @@
 /* Begin PBXBuildFile section */
 		846B3465CF67A375DE180670 /* Pods_LunchTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0C4E0DFF61A6ED7C81686DC5 /* Pods_LunchTests.framework */; };
 		C20E8C141F145C0B00D97293 /* Typist.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20E8C131F145C0B00D97293 /* Typist.swift */; };
-		C28A23B31F140C2900AB4BBC /* style.json in Resources */ = {isa = PBXBuildFile; fileRef = C28A23B21F140C2900AB4BBC /* style.json */; };
+		C20E8C161F148B7900D97293 /* FilterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20E8C151F148B7900D97293 /* FilterViewController.swift */; };
+		C20E8C181F1540B200D97293 /* style.json in Resources */ = {isa = PBXBuildFile; fileRef = C20E8C171F1540B200D97293 /* style.json */; };
+		C20E8C1A1F155AED00D97293 /* UnderKeyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20E8C191F155AED00D97293 /* UnderKeyboard.swift */; };
 		C2B524F11F1061F000C28A00 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B524F01F1061F000C28A00 /* AppDelegate.swift */; };
 		C2B524F31F1061F000C28A00 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B524F21F1061F000C28A00 /* ViewController.swift */; };
 		C2B524F61F1061F000C28A00 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C2B524F41F1061F000C28A00 /* Main.storyboard */; };
@@ -37,7 +39,9 @@
 		96B41D14892C28478E7F5481 /* Pods-Lunch.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Lunch.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Lunch/Pods-Lunch.debug.xcconfig"; sourceTree = "<group>"; };
 		BA8ED840684C4DE2705F74BF /* Pods-Lunch.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Lunch.release.xcconfig"; path = "Pods/Target Support Files/Pods-Lunch/Pods-Lunch.release.xcconfig"; sourceTree = "<group>"; };
 		C20E8C131F145C0B00D97293 /* Typist.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Typist.swift; sourceTree = "<group>"; };
-		C28A23B21F140C2900AB4BBC /* style.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = style.json; path = ../../../../.Trash/style.json; sourceTree = "<group>"; };
+		C20E8C151F148B7900D97293 /* FilterViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FilterViewController.swift; sourceTree = "<group>"; };
+		C20E8C171F1540B200D97293 /* style.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = style.json; sourceTree = "<group>"; };
+		C20E8C191F155AED00D97293 /* UnderKeyboard.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnderKeyboard.swift; sourceTree = "<group>"; };
 		C2B524ED1F1061F000C28A00 /* Lunch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Lunch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C2B524F01F1061F000C28A00 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		C2B524F21F1061F000C28A00 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -115,10 +119,12 @@
 		C2B524EF1F1061F000C28A00 /* Lunch */ = {
 			isa = PBXGroup;
 			children = (
+				C20E8C151F148B7900D97293 /* FilterViewController.swift */,
 				C2FABA281F109CE600925FE7 /* RestaurantListViewController.swift */,
 				C2FABA251F10923500925FE7 /* MapStyles */,
 				C2B524F01F1061F000C28A00 /* AppDelegate.swift */,
 				C2B524F21F1061F000C28A00 /* ViewController.swift */,
+				C20E8C191F155AED00D97293 /* UnderKeyboard.swift */,
 				C20E8C131F145C0B00D97293 /* Typist.swift */,
 				C2B524F41F1061F000C28A00 /* Main.storyboard */,
 				C2B524F71F1061F000C28A00 /* Assets.xcassets */,
@@ -140,7 +146,7 @@
 		C2FABA251F10923500925FE7 /* MapStyles */ = {
 			isa = PBXGroup;
 			children = (
-				C28A23B21F140C2900AB4BBC /* style.json */,
+				C20E8C171F1540B200D97293 /* style.json */,
 			);
 			path = MapStyles;
 			sourceTree = "<group>";
@@ -235,7 +241,7 @@
 				C2B524FB1F1061F000C28A00 /* LaunchScreen.storyboard in Resources */,
 				C2B524F81F1061F000C28A00 /* Assets.xcassets in Resources */,
 				C2B524F61F1061F000C28A00 /* Main.storyboard in Resources */,
-				C28A23B31F140C2900AB4BBC /* style.json in Resources */,
+				C20E8C181F1540B200D97293 /* style.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -350,6 +356,8 @@
 				C2B524F31F1061F000C28A00 /* ViewController.swift in Sources */,
 				C2FABA291F109CE600925FE7 /* RestaurantListViewController.swift in Sources */,
 				C2B524F11F1061F000C28A00 /* AppDelegate.swift in Sources */,
+				C20E8C161F148B7900D97293 /* FilterViewController.swift in Sources */,
+				C20E8C1A1F155AED00D97293 /* UnderKeyboard.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
