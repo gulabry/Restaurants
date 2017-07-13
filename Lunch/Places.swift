@@ -18,8 +18,8 @@ struct Restaurant {
     var long : Double
     var icon : URL
     var rating : Double?
+    var distanceFromSelectedPlaceInMiles : Double?
     var vicinity : String?
-    
     
     static func searchNearby(options: [String:Any], success: @escaping ([Restaurant]) -> Void, failure: @escaping (Error, String) -> Void) {
         
@@ -61,10 +61,14 @@ struct Restaurant {
                     let id = place["id"] as! String
                     let name = place["name"] as! String
                     let placeId = place["place_id"] as! String
-                    let rating = place["rating"] as! Double
+                    
+                    var rating = 0.0
+                    if let placeRating = place["rating"] as? Double {
+                        rating = placeRating
+                    }
                     let vicinity = place["vicinity"] as! String
                     
-                    let restaurant = Restaurant(id: id, placeId: placeId, name: name, lat: locationLat, long: locationLong, icon: URL(string: icon)!, rating: rating, vicinity: vicinity)
+                    let restaurant = Restaurant(id: id, placeId: placeId, name: name, lat: locationLat, long: locationLong, icon: URL(string: icon)!, rating: rating, distanceFromSelectedPlaceInMiles: 0.0, vicinity: vicinity)
                     restaurants.append(restaurant)
                 }
                 

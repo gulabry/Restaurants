@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		846B3465CF67A375DE180670 /* Pods_LunchTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0C4E0DFF61A6ED7C81686DC5 /* Pods_LunchTests.framework */; };
 		A831D0A31F1617B100B3BC3D /* Places.swift in Sources */ = {isa = PBXBuildFile; fileRef = A831D0A21F1617B100B3BC3D /* Places.swift */; };
+		A8551B9B1F173342009DD2AB /* RestaurantDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8551B9A1F173342009DD2AB /* RestaurantDetailViewController.swift */; };
 		C20E8C141F145C0B00D97293 /* Typist.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20E8C131F145C0B00D97293 /* Typist.swift */; };
 		C20E8C161F148B7900D97293 /* FilterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20E8C151F148B7900D97293 /* FilterViewController.swift */; };
 		C20E8C181F1540B200D97293 /* style.json in Resources */ = {isa = PBXBuildFile; fileRef = C20E8C171F1540B200D97293 /* style.json */; };
@@ -38,6 +39,7 @@
 		669D7E715A6746B4FC25FD4D /* Pods-LunchTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LunchTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-LunchTests/Pods-LunchTests.debug.xcconfig"; sourceTree = "<group>"; };
 		96B41D14892C28478E7F5481 /* Pods-Lunch.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Lunch.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Lunch/Pods-Lunch.debug.xcconfig"; sourceTree = "<group>"; };
 		A831D0A21F1617B100B3BC3D /* Places.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Places.swift; sourceTree = "<group>"; };
+		A8551B9A1F173342009DD2AB /* RestaurantDetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RestaurantDetailViewController.swift; sourceTree = "<group>"; };
 		BA8ED840684C4DE2705F74BF /* Pods-Lunch.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Lunch.release.xcconfig"; path = "Pods/Target Support Files/Pods-Lunch/Pods-Lunch.release.xcconfig"; sourceTree = "<group>"; };
 		C20E8C131F145C0B00D97293 /* Typist.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Typist.swift; sourceTree = "<group>"; };
 		C20E8C151F148B7900D97293 /* FilterViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FilterViewController.swift; sourceTree = "<group>"; };
@@ -122,6 +124,7 @@
 				A831D0A21F1617B100B3BC3D /* Places.swift */,
 				C20E8C151F148B7900D97293 /* FilterViewController.swift */,
 				C2FABA281F109CE600925FE7 /* RestaurantListViewController.swift */,
+				A8551B9A1F173342009DD2AB /* RestaurantDetailViewController.swift */,
 				C2FABA251F10923500925FE7 /* MapStyles */,
 				C2B524F01F1061F000C28A00 /* AppDelegate.swift */,
 				C2B524F21F1061F000C28A00 /* ViewController.swift */,
@@ -357,6 +360,7 @@
 				C2FABA291F109CE600925FE7 /* RestaurantListViewController.swift in Sources */,
 				C2B524F11F1061F000C28A00 /* AppDelegate.swift in Sources */,
 				C20E8C161F148B7900D97293 /* FilterViewController.swift in Sources */,
+				A8551B9B1F173342009DD2AB /* RestaurantDetailViewController.swift in Sources */,
 				A831D0A31F1617B100B3BC3D /* Places.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

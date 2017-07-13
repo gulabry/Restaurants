@@ -16,13 +16,12 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
     var currentLocation: CLLocation?
     var mapView: GMSMapView!
     var placesClient: GMSPlacesClient!
-    var zoomLevel: Float = 15.0
     
     var likelyPlaces: [GMSAutocompletePrediction] = []
-    
-    // The currently selected place.
+    var resultMarkers: [GMSMarker] = []
     var selectedPlace: GMSPlace?
     var nearbyRestaurants = [Restaurant]()
+    var filteredRestaurants = [Restaurant]()
     
     let defaultLocation = CLLocation(latitude: -33.869405, longitude: 151.199)
     
@@ -30,8 +29,35 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
     var searchTextField : SearchTextField? = nil
     var filterButton : UIButton?
     var dismissTapView : UIView?
+    var showListView = false
     
     @IBOutlet var tableView: UITableView!
+    @IBOutlet weak var showRestaurantListButton: UIButton!
+    @IBOutlet weak var randomRestaurantButton: UIButton!
+    
+    var mapScaleFactor : Double = 14.0 {
+        didSet {
+            mapView.animate(toZoom: Float(mapScaleFactor))
+        }
+    }
+    
+    var desiredRadius : Int = 10 {
+        didSet {
+            mapScaleFactor = 15.0 + (Double(desiredRadius) * -0.10)
+        }
+    }
+    
+    var desiredRating : Double = 3.0 {
+        didSet {
+            
+        }
+    }
+    
+    var desiredPrice : Int = 2 {
+        didSet {
+            
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,6 +65,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
         setupMap()
         setupLocationServices()
         setupView()
+        setupNotifications()
         configureKeyboard()
     }
     
@@ -48,39 +75,71 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
     
     func setupView() {
         self.tableView.isHidden = true
+        self.showRestaurantListButton.isHidden = true
+        self.randomRestaurantButton.isHidden = true
+    }
+    
+    func filterRestaruantsByOptions() {
+        for restaurant in nearbyRestaurants {
+            let price = restaurant
+        }
     }
     
     func setupMap() {
         
     }
     
+    func setupNotifications() {
+        let updateRadius = Notification(name: Notification.Name(rawValue: "updateRadius"))
+        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.changeRadius(notification:)), name: updateRadius.name, object: nil)
+        
+        let updateRating = Notification(name: Notification.Name(rawValue: "updateRating"))
+        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.changeRadius(notification:)), name: updateRating.name, object: nil)
+        
+        let updatePrice = Notification(name: Notification.Name(rawValue: "updatePrice"))
+        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.changeRadius(notification:)), name: updatePrice.name, object: nil)
+    }
+    
+    func changeRadius(notification : Notification) {
+        desiredRadius = Int((notification.object as! UISlider).value)
+    }
+    
+    func changeRating(notification : Notification) {
+        desiredRating = Double((notification.object as! UISlider).value)
+    }
+    
+    func changePrice(notification : Notification) {
+        desiredPrice = Int((notification.object as! UISlider).value)
+    }
+    
     func setupSearch() {
         
         filterButton = UIButton(type: .system)
-        filterButton?.frame = CGRect(x: view.frame.width - 58, y: 24, width: 38, height: 48)
+        filterButton?.frame = CGRect(x: view.frame.width - 58, y: 26, width: 38, height: 48)
         filterButton?.setImage(UIImage(named: "filter"), for: .normal)
         filterButton?.tintColor = .black
         filterButton?.addTarget(self, action: #selector(ViewController.showFilter), for: .touchUpInside)
         
-        searchTextField = SearchTextField(frame: CGRect(x: 10, y: 20, width: view.frame.width - 20, height: 55))
+        searchTextField = SearchTextField(frame: CGRect(x: 10, y: 20, width: view.frame.width - 20, height: 60))
         searchTextField?.borderStyle = .none
         searchTextField?.backgroundColor = .white
         searchTextField?.layer.masksToBounds = false
         searchTextField?.layer.shadowRadius = 1.0
         searchTextField?.layer.shadowColor = UIColor.black.cgColor
-        searchTextField?.layer.shadowOffset = CGSize(width: 1.5, height: 1.5)
+        searchTextField?.layer.shadowOffset = CGSize(width: 2.0, height: 2.0)
         searchTextField?.layer.shadowOpacity = 0.5
         searchTextField?.layer.cornerRadius = 4.0
         searchTextField?.delegate = self
-        searchTextField?.returnKeyType = UIReturnKeyType.search
+        searchTextField?.returnKeyType = UIReturnKeyType.done
+        searchTextField?.keyboardAppearance = .dark
         
         let attributes = [
             NSForegroundColorAttributeName: UIColor.black.withAlphaComponent(0.5),
-            NSFontAttributeName : UIFont(name: "AppleSDGothicNeo-UltraLight", size: 22)!
+            NSFontAttributeName : UIFont(name: "AppleSDGothicNeo-UltraLight", size: 24)!
         ]
         
-        searchTextField?.font = UIFont(name: "AppleSDGothicNeo-Regular", size: 22)!
-        searchTextField?.attributedPlaceholder = NSAttributedString(string: "Search Resturants Nearby!", attributes:attributes)
+        searchTextField?.font = UIFont(name: "AppleSDGothicNeo-Regular", size: 24)!
+        searchTextField?.attributedPlaceholder = NSAttributedString(string: "Search", attributes:attributes)
         
         view.insertSubview(searchTextField!, aboveSubview: view)
         view.insertSubview(filterButton!, aboveSubview: searchTextField!)
@@ -93,8 +152,10 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
         
         if status == .notDetermined {
             locationManager.requestWhenInUseAuthorization()
+            
         } else if status == .restricted || status == .denied {
             print("app cannot use location services")
+            
         } else if status == .authorizedWhenInUse {
             
             locationManager.desiredAccuracy = kCLLocationAccuracyBest
@@ -106,11 +167,12 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
             // Create a map.
             let camera = GMSCameraPosition.camera(withLatitude: defaultLocation.coordinate.latitude,
                                                   longitude: defaultLocation.coordinate.longitude,
-                                                  zoom: zoomLevel)
+                                                  zoom: Float(mapScaleFactor))
             mapView = GMSMapView.map(withFrame: view.bounds, camera: camera)
             mapView.settings.myLocationButton = false
             mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
             mapView.isMyLocationEnabled = true
+            mapView.setMinZoom(10, maxZoom: 20)
             mapView.delegate = self
             
             do {
@@ -131,8 +193,34 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
     
     //  MARK:   UITextField Delegate
     
-    func textFieldDidBeginEditing(_ textField: UITextField) {
-
+    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
+        DispatchQueue.main.async {
+            
+            let attributes = [
+                NSForegroundColorAttributeName: UIColor.white.withAlphaComponent(0.5),
+                NSFontAttributeName : UIFont(name: "AppleSDGothicNeo-UltraLight", size: 24)!
+            ]
+            
+            UIView.animate(withDuration: 0.25, animations: {
+                self.searchTextField?.textColor = .white
+                self.searchTextField?.attributedPlaceholder = NSAttributedString(string: "Search", attributes:attributes)
+                self.filterButton?.tintColor = .white
+                self.searchTextField?.backgroundColor = UIColor.darkGray
+            })
+        }
+        return true
+    }
+    
+    func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
+        DispatchQueue.main.async {
+            UIView.animate(withDuration: 0.25, animations: {
+                //self.searchTextField?.transform = CGAffineTransform.identity
+                self.searchTextField?.textColor = .black
+                self.searchTextField?.backgroundColor = .white
+                self.filterButton?.tintColor = .black
+            })
+        }
+        return true
     }
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
@@ -142,12 +230,54 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
     
     func updateSearchResultsView() {
         DispatchQueue.main.async {
-            if self.likelyPlaces.count > 0 {
+            if self.likelyPlaces.count == 0 || self.searchTextField?.text!.characters.count == 0 {
+                self.tableView.isHidden = true
+            } else {
                 self.tableView.isHidden = false
                 self.tableView.reloadData()
-            } else {
-                self.tableView.isHidden = true
             }
+            
+            self.showRestaurantListButton.isHidden = true
+            self.randomRestaurantButton.isHidden = true
+        }
+    }
+    
+    func showNearbyRestaurantsOnMap(restaurants : [Restaurant]) {
+        
+        let boundsRegion = GMSCoordinateBounds()
+        
+        for restaurant in restaurants {
+            let position = CLLocationCoordinate2D(latitude: restaurant.lat, longitude: restaurant.long)
+            let marker = GMSMarker(position: position)
+            marker.title = restaurant.name
+            marker.appearAnimation = .pop
+            marker.isFlat = true
+            marker.map = self.mapView
+            
+            boundsRegion.includingCoordinate(marker.position)
+            resultMarkers.append(marker)
+        }
+        
+        //  Add selected address to map
+        //
+        let position = CLLocationCoordinate2D(latitude: (self.selectedPlace?.coordinate.latitude)!, longitude: (self.selectedPlace?.coordinate.longitude)!)
+        let marker = GMSMarker(position: position)
+        marker.icon = GMSMarker.markerImage(with: .blue)
+        marker.title = self.selectedPlace?.name
+        marker.appearAnimation = .pop
+        marker.map = self.mapView
+        resultMarkers.append(marker)
+        
+        DispatchQueue.main.async {
+            self.mapView.selectedMarker = marker
+            //self.mapView.animate(toLocation: (self.selectedPlace?.coordinate)!)
+            //self.mapView.animate(toZoom: Float(self.mapScaleFactor))
+            self.mapView.animate(with: GMSCameraUpdate.fit(boundsRegion, withPadding: 10))
+            
+            UIView.animate(withDuration: 0.25, animations: { 
+                self.showRestaurantListButton.isHidden = false
+                self.randomRestaurantButton.isHidden = false
+            })
         }
     }
     
@@ -160,11 +290,76 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        performSegue(withIdentifier: "showResturants", sender: nil)
+        searchTextField?.resignFirstResponder()
         return true
     }
     
+    func mapView(_ mapView: GMSMapView, didTap marker: GMSMarker) -> Bool {
+        
+        var tappedPlace : Restaurant?
+        
+        for place in nearbyRestaurants {
+            if marker.position.latitude == place.lat && marker.position.longitude == place.long  {
+                tappedPlace = place
+            }
+        }
+        
+        if let place = tappedPlace {
+            performSegue(withIdentifier: "showRestaurantDetail", sender: place)
+        }
+        
+        return true
+    }
     
+    func prepRestaurantListView() {
+        DispatchQueue.main.async {
+            let newFrame = self.tableView.frame
+            let newY = newFrame.origin.y + 46
+            let newHeight = self.view.frame.height - newY - 10
+            
+            self.tableView.frame = CGRect(x: newFrame.origin.x, y: newY, width: newFrame.width, height: newHeight)
+        }
+    }
+    
+    @IBAction func showRestaurantList(_ sender: Any) {
+        
+        if showListView {
+            showListView = false
+            self.tableView.rowHeight = 40
+
+        } else {
+            showListView = true
+            prepRestaurantListView()
+            self.tableView.rowHeight = 85
+            
+            DispatchQueue.main.async {
+                self.tableView.isHidden = false
+                self.tableView.reloadData()
+            }
+        }
+    }
+    
+    @IBAction func pickRandomRestaurant(_ sender: Any) {
+        let randomRestaurant = nearbyRestaurants[Int(arc4random_uniform(UInt32(nearbyRestaurants.count)))]
+        placesClient.lookUpPlaceID(randomRestaurant.placeId) { (place, err) in
+            self.mapView.clear()
+            self.selectedPlace = place
+            self.searchTextField?.resignFirstResponder()
+            self.mapView.animate(toLocation: place!.coordinate)
+            //  Add selected address to map
+            //
+            let position = CLLocationCoordinate2D(latitude: (self.selectedPlace?.coordinate.latitude)!, longitude: (self.selectedPlace?.coordinate.longitude)!)
+            let marker = GMSMarker(position: position)
+            marker.icon = GMSMarker.markerImage(with: .blue)
+            marker.title = self.selectedPlace?.name
+            marker.appearAnimation = .pop
+            marker.map = self.mapView
+            
+            self.mapView.selectedMarker = marker
+            print("random selected place: \(place!.formattedAddress!)")
+        }
+    }
+
     @IBAction func dismissKeyboard(_ sender: Any) {
         searchTextField?.resignFirstResponder()
     }
@@ -189,23 +384,59 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "addressCell", for: indexPath) as! AddressCell
-        
-        let place = likelyPlaces[indexPath.row]
-        
-        let regularFont = UIFont(name: "AppleSDGothicNeo-UltraLight", size: 20)!
-        let boldFont = UIFont(name: "AppleSDGothicNeo-Medium", size: 20)!
-        
-        let bolded = place.attributedFullText.mutableCopy() as! NSMutableAttributedString
-        bolded.enumerateAttribute(kGMSAutocompleteMatchAttribute, in: NSMakeRange(0, bolded.length), options: []) {
-            (value, range: NSRange, stop: UnsafeMutablePointer<ObjCBool>) -> Void in
-            let font = (value == nil) ? regularFont : boldFont
-            bolded.addAttribute(NSFontAttributeName, value: font, range: range)
+        if showListView {
+            
+            let cell = tableView.dequeueReusableCell(withIdentifier: "restaurantCell", for: indexPath) as! RestaurantCell
+            
+            let restaurant = nearbyRestaurants[indexPath.row]
+            
+            cell.titleLabel.text = restaurant.name
+            
+            let distanceInMeters = GMSGeometryDistance((selectedPlace!.coordinate), CLLocationCoordinate2DMake(restaurant.lat, restaurant.long))
+            
+            let milesDistance = distanceInMeters / 1609.34  //  devide by a mile in meters
+            
+            restaurant.distanceFromSelectedPlaceInMiles = milesDistance
+            
+            cell.distanceLabel.text = "\(round(milesDistance * 100) / 100)mi"
+            
+            placesClient.lookUpPlaceID(restaurant.placeId, callback: { (place, error) in
+                DispatchQueue.main.async {
+                    cell.addressLabel.text = place!.formattedAddress
+                }
+            })
+            
+            placesClient.lookUpPhotos(forPlaceID: restaurant.placeId, callback: { (list, error) in
+                let first = list?.results.first
+                self.placesClient.loadPlacePhoto(first!, callback: { (image, error) in
+                    DispatchQueue.main.async {
+                        cell.iconImageView.image = image
+                    }
+                })
+            })
+            
+            return cell
+            
+        } else {
+            
+            let cell = tableView.dequeueReusableCell(withIdentifier: "addressCell", for: indexPath)
+            
+            let place = likelyPlaces[indexPath.row]
+            
+            let regularFont = UIFont(name: "AppleSDGothicNeo-UltraLight", size: 20)!
+            let boldFont = UIFont(name: "AppleSDGothicNeo-Medium", size: 20)!
+            
+            let bolded = place.attributedFullText.mutableCopy() as! NSMutableAttributedString
+            bolded.enumerateAttribute(kGMSAutocompleteMatchAttribute, in: NSMakeRange(0, bolded.length), options: []) {
+                (value, range: NSRange, stop: UnsafeMutablePointer<ObjCBool>) -> Void in
+                let font = (value == nil) ? regularFont : boldFont
+                bolded.addAttribute(NSFontAttributeName, value: font, range: range)
+            }
+            
+            cell.textLabel?.attributedText = bolded
+            
+            return cell
         }
-        
-        cell.textLabel?.attributedText = bolded
-        
-        return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -213,20 +444,22 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
         searchTextField?.attributedText = predictedPlace.attributedPrimaryText
         tableView.isHidden = true
         
-        GMSPlacesClient.shared().lookUpPlaceID(predictedPlace.placeID!) { (place, err) in
-            
+        placesClient.lookUpPlaceID(predictedPlace.placeID!) { (place, err) in
+            self.mapView.clear()
             self.selectedPlace = place
+            self.searchTextField?.resignFirstResponder()
             self.mapView.animate(toLocation: place!.coordinate)
             
             let options = [
                 "latitude": place!.coordinate.latitude,
                 "longitude": place!.coordinate.longitude,
-                "radius": Int(1000) // METERS
+                "radius": Int(1609 * self.desiredRadius) // Miles to METERS
             ] as [String : Any]
             
-            Restaurant.searchNearby(options: options, success: { (results) in
+            Restaurant.searchNearby(options: options, success: { (restaurants) in
                 
-                print(results)
+                self.nearbyRestaurants = restaurants
+                self.showNearbyRestaurantsOnMap(restaurants: restaurants)
                 
             }, failure: { (error, reason) in
                 print(error, reason)
@@ -241,7 +474,11 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return likelyPlaces.count
+        if showListView {
+            return nearbyRestaurants.count
+        } else {
+            return likelyPlaces.count
+        }
     }
     
     //  MARK:   Typest Keyboard Observer
@@ -261,39 +498,11 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
             .start()
     }
     
-    //  MARK: GMSMapViewDelegate Methods
-    
-//    func mapView(_ mapView: GMSMapView, willMove gesture: Bool) {
-//        DispatchQueue.main.async {
-//            var searchFrame = self.searchTextField?.frame
-//            searchFrame?.origin.y = -30
-//            UIView.animate(withDuration: 0.25, animations: { 
-//                self.searchTextField?.frame = searchFrame!
-//            })
-//        }
-//    }
-//    
-//    
-//    func mapView(_ mapView: GMSMapView, idleAt position: GMSCameraPosition) {
-//        DispatchQueue.main.async {
-//            var searchFrame = self.searchTextField?.frame
-//            searchFrame?.origin.y = 20
-//            UIView.animate(withDuration: 0.25, animations: {
-//                self.searchTextField?.frame = searchFrame!
-//            })
-//        }
-//    }
-//    
     func mapViewSnapshotReady(_ mapView: GMSMapView) {
         mapView.delegate = self
     }
     
     //  MARK: GMSAutocompleteTableDataSource Methods
-    
-    func getNearbyPlaces() {
-        let filter = GMSAutocompleteFilter()
-        filter.type = .region
-    }
     
     func placeAutocomplete(query : String) {
         let filter = GMSAutocompleteFilter()
@@ -329,6 +538,13 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
     
     //  MARK: Segue Methods
     
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "showRestaurantDetail" {
+            let destinitation = segue.destination as! RestaurantDetailHolderViewController
+            destinitation.restaurant = sender as? Restaurant
+        }
+    }
+    
     @IBAction func dismissToMap(segue : UIStoryboardSegue) {
         print("back to map")
     }
@@ -346,7 +562,7 @@ extension ViewController: CLLocationManagerDelegate {
         
         let camera = GMSCameraPosition.camera(withLatitude: location.coordinate.latitude,
                                               longitude: location.coordinate.longitude,
-                                              zoom: zoomLevel)
+                                              zoom: Float(mapScaleFactor))
         
         if mapView.isHidden {
             mapView.isHidden = false
@@ -381,9 +597,12 @@ extension ViewController: CLLocationManagerDelegate {
     }
 }
 
-class AddressCell : UITableViewCell {
+class RestaurantCell : UITableViewCell {
     
-    
+    @IBOutlet weak var iconImageView: UIImageView!
+    @IBOutlet weak var titleLabel: UILabel!
+    @IBOutlet weak var addressLabel: UILabel!
+    @IBOutlet weak var distanceLabel: UILabel!
 }
 
 class SearchTextField : UITextField {

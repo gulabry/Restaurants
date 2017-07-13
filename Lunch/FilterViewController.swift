@@ -33,6 +33,8 @@ class FilterViewController: UIViewController {
     @IBAction func radiusSlider(_ sender: UISlider) {
         radiusLabel.text = "\(Int(sender.value))mi"
         radius = Int(sender.value)
+        let name = Notification(name: Notification.Name(rawValue: "updateRadius"))
+        NotificationCenter.default.post(name: name.name, object: sender)
     }
     
 
