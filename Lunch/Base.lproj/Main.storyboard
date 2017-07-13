@@ -142,10 +142,9 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gfF-NV-vWJ">
-                                <rect key="frame" x="16" y="89" width="109" height="34"/>
+                                <rect key="frame" x="10" y="89" width="115" height="34"/>
                                 <color key="backgroundColor" red="0.10196078568696976" green="0.73725491762161255" blue="0.61176472902297974" alpha="1" colorSpace="calibratedRGB"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="109" id="32K-Dk-3TD"/>
                                     <constraint firstAttribute="height" constant="34" id="sfP-Xi-DJT"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" name="HelveticaNeue-Light" family="Helvetica Neue" pointSize="18"/>
@@ -165,12 +164,12 @@
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <gestureRecognizers/>
                         <constraints>
+                            <constraint firstItem="iQg-oR-PU2" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="69" id="3iB-VA-Na6"/>
                             <constraint firstItem="iQg-oR-PU2" firstAttribute="centerY" secondItem="gfF-NV-vWJ" secondAttribute="centerY" id="FsN-4E-B2t"/>
-                            <constraint firstAttribute="leadingMargin" secondItem="gfF-NV-vWJ" secondAttribute="leading" id="NLf-Hx-yF8"/>
                             <constraint firstItem="iQg-oR-PU2" firstAttribute="leading" secondItem="gfF-NV-vWJ" secondAttribute="trailing" constant="8" id="UgY-y7-Ds8"/>
                             <constraint firstAttribute="trailing" secondItem="BGy-ii-Rfn" secondAttribute="trailing" constant="10" id="Vqf-c0-BnU"/>
                             <constraint firstItem="iQg-oR-PU2" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="iCe-vr-LVv"/>
-                            <constraint firstItem="iQg-oR-PU2" firstAttribute="top" secondItem="BGy-ii-Rfn" secondAttribute="top" constant="4" id="j7O-QP-Ik9"/>
+                            <constraint firstItem="gfF-NV-vWJ" firstAttribute="leading" secondItem="BGy-ii-Rfn" secondAttribute="leading" id="jhx-zy-pvy"/>
                             <constraint firstItem="BGy-ii-Rfn" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="10" id="tm6-65-BGb"/>
                             <constraint firstItem="BGy-ii-Rfn" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="65" id="vLv-Dv-wsx"/>
                         </constraints>
@@ -181,6 +180,8 @@
                         <outlet property="searchDisplayController" destination="mcu-hz-8k0" id="REb-Uo-07n"/>
                         <outlet property="showRestaurantListButton" destination="iQg-oR-PU2" id="sYq-On-FdQ"/>
                         <outlet property="tableView" destination="BGy-ii-Rfn" id="zRK-dC-IGz"/>
+                        <outlet property="tableViewHeight" destination="mK8-1K-8Dt" id="0Ih-x4-UM5"/>
+                        <outlet property="tableViewTopLayout" destination="vLv-Dv-wsx" id="wkG-Ty-4CH"/>
                         <segue destination="Oc9-ct-UuU" kind="presentation" identifier="showResturants" modalPresentationStyle="overCurrentContext" modalTransitionStyle="coverVertical" id="mwE-dc-6V7"/>
                         <segue destination="aL6-Ky-NPW" kind="presentation" identifier="showRestaurantDetail" modalPresentationStyle="overCurrentContext" id="a5Y-69-x26"/>
                     </connections>
@@ -584,7 +585,7 @@
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" navigationBarHidden="YES" id="Pcy-uc-fY0" sceneMemberID="viewController">
                     <toolbarItems/>
                     <nil key="simulatedTopBarMetrics"/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="5lL-Dc-thz">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" misplaced="YES" id="5lL-Dc-thz">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>

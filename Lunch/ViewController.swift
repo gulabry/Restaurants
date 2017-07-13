@@ -20,6 +20,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
     var likelyPlaces: [GMSAutocompletePrediction] = []
     var resultMarkers: [GMSMarker] = []
     var selectedPlace: GMSPlace?
+    
     var nearbyRestaurants = [Restaurant]()
     var filteredRestaurants = [Restaurant]()
     
@@ -34,6 +35,12 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
     @IBOutlet var tableView: UITableView!
     @IBOutlet weak var showRestaurantListButton: UIButton!
     @IBOutlet weak var randomRestaurantButton: UIButton!
+    
+    @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
+    var tableViewHeightDefault : CGFloat?
+    
+    @IBOutlet weak var tableViewTopLayout: NSLayoutConstraint!
+    var tableViewTopLayoutDefault : CGFloat?
     
     var mapScaleFactor : Double = 14.0 {
         didSet {
@@ -74,6 +81,10 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
     }
     
     func setupView() {
+        
+        tableViewHeightDefault = tableViewHeight.constant
+        tableViewTopLayoutDefault = tableViewTopLayout.constant
+        
         self.tableView.isHidden = true
         self.showRestaurantListButton.isHidden = true
         self.randomRestaurantButton.isHidden = true
@@ -167,7 +178,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
             // Create a map.
             let camera = GMSCameraPosition.camera(withLatitude: defaultLocation.coordinate.latitude,
                                                   longitude: defaultLocation.coordinate.longitude,
-                                                  zoom: Float(mapScaleFactor))
+                                                  zoom: 13.5)
             mapView = GMSMapView.map(withFrame: view.bounds, camera: camera)
             mapView.settings.myLocationButton = false
             mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
@@ -201,7 +212,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
                 NSFontAttributeName : UIFont(name: "AppleSDGothicNeo-UltraLight", size: 24)!
             ]
             
-            UIView.animate(withDuration: 0.25, animations: {
+            UIView.animate(withDuration: 0.15, animations: {
                 self.searchTextField?.textColor = .white
                 self.searchTextField?.attributedPlaceholder = NSAttributedString(string: "Search", attributes:attributes)
                 self.filterButton?.tintColor = .white
@@ -213,8 +224,14 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
     
     func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
         DispatchQueue.main.async {
-            UIView.animate(withDuration: 0.25, animations: {
-                //self.searchTextField?.transform = CGAffineTransform.identity
+            
+            let attributes = [
+                NSForegroundColorAttributeName: UIColor.black.withAlphaComponent(0.5),
+                NSFontAttributeName : UIFont(name: "AppleSDGothicNeo-UltraLight", size: 24)!
+            ]
+            
+            UIView.animate(withDuration: 0.15, animations: {
+                self.searchTextField?.attributedPlaceholder = NSAttributedString(string: "Search", attributes:attributes)
                 self.searchTextField?.textColor = .black
                 self.searchTextField?.backgroundColor = .white
                 self.filterButton?.tintColor = .black
@@ -270,8 +287,6 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
         
         DispatchQueue.main.async {
             self.mapView.selectedMarker = marker
-            //self.mapView.animate(toLocation: (self.selectedPlace?.coordinate)!)
-            //self.mapView.animate(toZoom: Float(self.mapScaleFactor))
             self.mapView.animate(with: GMSCameraUpdate.fit(boundsRegion, withPadding: 10))
             
             UIView.animate(withDuration: 0.25, animations: { 
@@ -297,6 +312,11 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
     func mapView(_ mapView: GMSMapView, didTap marker: GMSMarker) -> Bool {
         
         var tappedPlace : Restaurant?
+
+        if selectedPlace!.coordinate.latitude == marker.position.latitude && selectedPlace!.coordinate.longitude == marker.position.longitude  {
+            performSegue(withIdentifier: "showRestaurantDetail", sender: selectedPlace!)
+            return true
+        }
         
         for place in nearbyRestaurants {
             if marker.position.latitude == place.lat && marker.position.longitude == place.long  {
@@ -313,28 +333,65 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
     
     func prepRestaurantListView() {
         DispatchQueue.main.async {
-            let newFrame = self.tableView.frame
-            let newY = newFrame.origin.y + 46
-            let newHeight = self.view.frame.height - newY - 10
             
-            self.tableView.frame = CGRect(x: newFrame.origin.x, y: newY, width: newFrame.width, height: newHeight)
+            self.tableView.isHidden = false
+
+            let buttonOffset = self.showRestaurantListButton.frame.maxY - 10
+            let newHeight = self.view.frame.height - buttonOffset + 20
+            
+            self.tableView.rowHeight = 85
+
+            self.tableViewTopLayout.constant = buttonOffset
+            self.tableViewHeight.constant = newHeight - 20
+            //self.tableView.frame = CGRect(x: newFrame.origin.x, y: newY, width: newFrame.width, height: newHeight)
+            
+            self.tableView.reloadData()
+        }
+    }
+    
+    func resetRestaurantListView() {
+        DispatchQueue.main.async {
+            
+            self.tableView.rowHeight = 40
+            
+            self.tableViewTopLayout.constant = self.tableViewTopLayoutDefault!
+            self.tableViewHeight.constant = self.tableViewHeightDefault!
+            
+            self.tableView.isHidden = true
         }
     }
     
     @IBAction func showRestaurantList(_ sender: Any) {
         
         if showListView {
-            showListView = false
-            self.tableView.rowHeight = 40
-
-        } else {
-            showListView = true
-            prepRestaurantListView()
-            self.tableView.rowHeight = 85
             
             DispatchQueue.main.async {
-                self.tableView.isHidden = false
-                self.tableView.reloadData()
+                self.showListView = false
+                self.resetRestaurantListView()
+                self.showNearbyRestaurantsOnMap(restaurants: self.nearbyRestaurants)
+                self.showRestaurantListButton.setTitle("Show List", for: .normal)
+            }
+            
+        } else {
+            
+            self.showListView = true
+            self.mapView.clear()
+            self.prepRestaurantListView()
+            self.showRestaurantListButton.setTitle("Hide List", for: .normal)
+        
+        }
+    }
+    
+    func calculateDistancesForRestaurants() {
+        
+        if let _ = selectedPlace {
+            for (index, _) in nearbyRestaurants.enumerated() {
+                
+                let distanceInMeters = GMSGeometryDistance((selectedPlace?.coordinate)!, CLLocationCoordinate2DMake(nearbyRestaurants[index].lat, nearbyRestaurants[index].long))
+                
+                let milesDistance = distanceInMeters / 1609.34  //  devide by a mile in meters
+                
+                nearbyRestaurants[index].distanceFromSelectedPlaceInMiles = round(milesDistance * 100) / 100
             }
         }
     }
@@ -392,17 +449,15 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
             
             cell.titleLabel.text = restaurant.name
             
-            let distanceInMeters = GMSGeometryDistance((selectedPlace!.coordinate), CLLocationCoordinate2DMake(restaurant.lat, restaurant.long))
-            
-            let milesDistance = distanceInMeters / 1609.34  //  devide by a mile in meters
-            
-            restaurant.distanceFromSelectedPlaceInMiles = milesDistance
-            
-            cell.distanceLabel.text = "\(round(milesDistance * 100) / 100)mi"
+            if let miles = restaurant.distanceFromSelectedPlaceInMiles {
+                cell.distanceLabel.text = "\(miles)mi"
+            }
             
             placesClient.lookUpPlaceID(restaurant.placeId, callback: { (place, error) in
                 DispatchQueue.main.async {
-                    cell.addressLabel.text = place!.formattedAddress
+                    if let _ = place {
+                        cell.addressLabel.text = place!.formattedAddress
+                    }
                 }
             })
             
@@ -459,6 +514,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
             Restaurant.searchNearby(options: options, success: { (restaurants) in
                 
                 self.nearbyRestaurants = restaurants
+                self.calculateDistancesForRestaurants()
                 self.showNearbyRestaurantsOnMap(restaurants: restaurants)
                 
             }, failure: { (error, reason) in
@@ -505,6 +561,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
     //  MARK: GMSAutocompleteTableDataSource Methods
     
     func placeAutocomplete(query : String) {
+        
         let filter = GMSAutocompleteFilter()
         filter.type = .noFilter
         
@@ -524,9 +581,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
                     
                     let newFrame = CGRect(x: self.tableView.frame.origin.x, y: self.tableView.frame.origin.y, width: self.tableView.frame.width, height: CGFloat(newHeight))
                     
-                    UIView.animate(withDuration: 0.0, animations: {
-                        self.tableView.frame = newFrame
-                    })
+                    self.tableView.frame = newFrame
+                    
                 }
                 
                 for result in results {
