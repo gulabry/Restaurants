@@ -35,6 +35,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
     @IBOutlet var tableView: UITableView!
     @IBOutlet weak var showRestaurantListButton: UIButton!
     @IBOutlet weak var randomRestaurantButton: UIButton!
+    @IBOutlet weak var sortAndClearButton: UIButton!
+    @IBOutlet weak var showVisualsForDataButton: UIButton!
     
     @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
     var tableViewHeightDefault : CGFloat?
@@ -373,6 +375,19 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
         }
     }
     
+    @IBAction func clearAndSortTrigger(_ sender: Any) {
+        if showListView {
+
+        } else {
+
+        }
+    }
+    
+    @IBAction func showVisualRankingData(_ sender: Any) {
+        
+        
+    }
+    
     @IBAction func showRestaurantList(_ sender: Any) {
         
         if showListView {
@@ -382,6 +397,15 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
                 self.resetRestaurantListView()
                 self.showNearbyRestaurantsOnMap(restaurants: self.nearbyRestaurants)
                 self.showRestaurantListButton.setTitle("Show List", for: .normal)
+                self.sortAndClearButton.backgroundColor = #colorLiteral(red: 0.3398334384, green: 0.6123188138, blue: 0.7547396421, alpha: 1)
+                self.sortAndClearButton.titleLabel?.textColor = .white
+                if self.sortAndClearButton.titleLabel?.text == "Clear" {
+                    self.sortAndClearButton.setTitle("Sort Rating", for: .normal)
+
+                } else if self.sortAndClearButton.titleLabel?.text == "Sort Rating" {
+                    self.sortAndClearButton.setTitle("Sort Price", for: .normal)
+
+                }
             }
             
         } else {
@@ -390,6 +414,9 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
             self.mapView.clear()
             self.prepRestaurantListView()
             self.showRestaurantListButton.setTitle("Hide List", for: .normal)
+            sortAndClearButton.backgroundColor = .white
+            sortAndClearButton.titleLabel?.textColor = .black
+            searchTextField?.text = ""
         
         }
     }
@@ -507,33 +534,67 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let predictedPlace = likelyPlaces[indexPath.row]
-        searchTextField?.attributedText = predictedPlace.attributedPrimaryText
-        tableView.isHidden = true
         
-        placesClient.lookUpPlaceID(predictedPlace.placeID!) { (place, err) in
-            self.mapView.clear()
-            self.selectedPlace = place
-            self.searchTextField?.resignFirstResponder()
-            self.mapView.animate(toLocation: place!.coordinate)
+        if showListView  {
+            let restaruant = nearbyRestaurants[indexPath.row]
+            tableView.isHidden = true
             
-            let options = [
-                "latitude": place!.coordinate.latitude,
-                "longitude": place!.coordinate.longitude,
-                "radius": Int(Double(self.desiredRadius) * 1609.34) // Miles to METERS
-            ] as [String : Any]
-            
-            Restaurant.searchNearby(options: options, success: { (restaurants) in
+            placesClient.lookUpPlaceID(restaruant.placeId) { (place, err) in
+                self.mapView.clear()
+                self.selectedPlace = place
+                self.searchTextField?.resignFirstResponder()
+                self.mapView.animate(toLocation: place!.coordinate)
                 
-                self.nearbyRestaurants = restaurants
-                self.calculateDistancesForRestaurants()
-                self.showNearbyRestaurantsOnMap(restaurants: restaurants)
+                let options = [
+                    "latitude": place!.coordinate.latitude,
+                    "longitude": place!.coordinate.longitude,
+                    "radius": Int(Double(self.desiredRadius) * 1609.34) // Miles to METERS
+                    ] as [String : Any]
                 
-            }, failure: { (error, reason) in
-                print(error, reason)
-            })
+                Restaurant.searchNearby(options: options, success: { (restaurants) in
+                    
+                    self.nearbyRestaurants = restaurants
+                    self.calculateDistancesForRestaurants()
+                    self.showNearbyRestaurantsOnMap(restaurants: restaurants)
+                    
+                }, failure: { (error, reason) in
+                    print(error, reason)
+                })
+                
+                print("user selected place: \(place!.formattedAddress!)")
+            }
+
             
-            print("user selected place: \(place!.formattedAddress!)")
+        } else {
+            
+            let predictedPlace = likelyPlaces[indexPath.row]
+            searchTextField?.attributedText = predictedPlace.attributedPrimaryText
+            tableView.isHidden = true
+            
+            placesClient.lookUpPlaceID(predictedPlace.placeID!) { (place, err) in
+                self.mapView.clear()
+                self.selectedPlace = place
+                self.searchTextField?.resignFirstResponder()
+                self.mapView.animate(toLocation: place!.coordinate)
+                
+                let options = [
+                    "latitude": place!.coordinate.latitude,
+                    "longitude": place!.coordinate.longitude,
+                    "radius": Int(Double(self.desiredRadius) * 1609.34) // Miles to METERS
+                    ] as [String : Any]
+                
+                Restaurant.searchNearby(options: options, success: { (restaurants) in
+                    
+                    self.nearbyRestaurants = restaurants
+                    self.calculateDistancesForRestaurants()
+                    self.showNearbyRestaurantsOnMap(restaurants: restaurants)
+                    
+                }, failure: { (error, reason) in
+                    print(error, reason)
+                })
+                
+                print("user selected place: \(place!.formattedAddress!)")
+            }
         }
     }
 
@@ -623,7 +684,12 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "showRestaurantDetail" {
             let destinitation = segue.destination as! RestaurantDetailHolderViewController
-            destinitation.restaurant = sender as? Restaurant
+
+            if let _ = destinitation.restaurant {
+                destinitation.restaurant = sender as? Restaurant
+            } else {
+                destinitation.place = sender as? GMSPlace
+            }
         }
     }
     

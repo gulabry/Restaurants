@@ -12,12 +12,19 @@ import GooglePlaces
 class RestaurantDetailHolderViewController : UIViewController {
     
     var restaurant : Restaurant?
+    var place : GMSPlace?
+    
     @IBOutlet weak var container: UIView!
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "embed" {
             let restaurantDetailVC = segue.destination as! RestaurantDetailViewController
-            restaurantDetailVC.restaurant = restaurant
+            
+            if let _ = restaurant {
+                restaurantDetailVC.restaurant = restaurant
+            } else {
+                restaurantDetailVC.place = place
+            }
         }
     }
 }
@@ -25,6 +32,7 @@ class RestaurantDetailHolderViewController : UIViewController {
 class RestaurantDetailViewController: UIViewController {
     
     var restaurant : Restaurant?
+    var place : GMSPlace?
     
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var addressLabel: UILabel!
@@ -37,18 +45,38 @@ class RestaurantDetailViewController: UIViewController {
         super.viewDidLoad()
         
         if let _ = restaurant {
-            activityIndicatorView.startAnimating()
-            loadFirstPhotoForPlace(placeID: restaurant!.placeId)
-            
-            GMSPlacesClient.shared().lookUpPlaceID(restaurant!.placeId, callback: { (place, error) in
-                if let _ = place {
-                    self.titleLabel.text = place!.name
-                    self.addressLabel.text = place!.formattedAddress
-                    self.starsLabel.text = "\(String(describing: place!.rating))"
-                    self.priceLabel.text = "\(String(describing: place!.priceLevel.rawValue))"
-                }
-            })
+            startInfoLoadingWithRestaurant(restaurant: restaurant!)
+        } else if let _ = place {
+            startInfoLoadingWithPlace(place: place!)
         }
+    }
+    
+    func startInfoLoadingWithRestaurant(restaurant: Restaurant) {
+        activityIndicatorView.startAnimating()
+        loadFirstPhotoForPlace(placeID: restaurant.placeId)
+        
+        GMSPlacesClient.shared().lookUpPlaceID(restaurant.placeId, callback: { (place, error) in
+            if let _ = place {
+                self.titleLabel.text = place!.name
+                self.addressLabel.text = place!.formattedAddress
+                self.starsLabel.text = "\(String(describing: place!.rating))"
+                self.priceLabel.text = "\(String(describing: place!.priceLevel.rawValue))"
+            }
+        })
+    }
+    
+    func startInfoLoadingWithPlace(place : GMSPlace) {
+        activityIndicatorView.startAnimating()
+        loadFirstPhotoForPlace(placeID: place.placeID)
+        
+        GMSPlacesClient.shared().lookUpPlaceID(place.placeID, callback: { (place, error) in
+            if let _ = place {
+                self.titleLabel.text = place!.name
+                self.addressLabel.text = place!.formattedAddress
+                self.starsLabel.text = "\(String(describing: place!.rating))"
+                self.priceLabel.text = "\(String(describing: place!.priceLevel.rawValue))"
+            }
+        })
     }
     
     func loadFirstPhotoForPlace(placeID: String) {

@@ -12,7 +12,7 @@ import GooglePlaces
 
 struct Constants {
     static let mapsApiKey = "AIzaSyBnAqb9hVBFrdDXy7eoFfrj1isElbtol_A"
-    static let placesSdkKey = "AIzaSyDA5U97sr3huajxA0Uws37oBVSAkqJuA38"
+    static let placesSdkKey = "AIzaSyD_9fQdbj84aOuHaCHVRK1JA8igQ5fITzA"
     static let placesApiKey = "AIzaSyAs8fBHu7G8qzxe4wzRQYqQIH6DVrgjKkY"
 }
 
@@ -20,8 +20,7 @@ struct Constants {
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-
-
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         
