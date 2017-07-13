@@ -12,7 +12,7 @@ import GooglePlaces
 
 struct Constants {
     static let mapsApiKey = "AIzaSyBnAqb9hVBFrdDXy7eoFfrj1isElbtol_A"
-    static let placesSdkKey = "AIzaSyB5BReaIMsndLxYcK27OtUWG6fRacZl3lk"
+    static let placesSdkKey = "AIzaSyDA5U97sr3huajxA0Uws37oBVSAkqJuA38"
     static let placesApiKey = "AIzaSyAs8fBHu7G8qzxe4wzRQYqQIH6DVrgjKkY"
 }
 
@@ -24,9 +24,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
-        
-        UIBarButtonItem.appearance().setBackButtonTitlePositionAdjustment(UIOffsetMake(0, -60), for:UIBarMetrics.default)
-
         
         GMSServices.provideAPIKey(Constants.mapsApiKey)
         GMSPlacesClient.provideAPIKey(Constants.placesSdkKey)

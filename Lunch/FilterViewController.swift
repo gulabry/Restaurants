@@ -15,12 +15,18 @@ class FilterViewController: UIViewController {
     @IBOutlet var ratingLabel: UIButton!
     @IBOutlet var priceLabel: UIButton!
     
-    var radius : Int = 20
+    @IBOutlet weak var radiusSlider: UISlider!
+    @IBOutlet weak var ratingSlider: UISlider!
+    @IBOutlet weak var priceSlider: UISlider!
+    
+    var radius : Int?
     var rating : Double?
-    var price : Double = 25.0
+    var price : Double?
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        setupSliders()
         
         let shadowPath = UIBezierPath(rect: enclosingView.bounds)
         enclosingView.layer.masksToBounds = false;
@@ -30,6 +36,34 @@ class FilterViewController: UIViewController {
         enclosingView.layer.shadowPath = shadowPath.cgPath;
     }
     
+    func setupSliders() {
+        radius = UserDefaults.standard.integer(forKey: "radius")
+        rating = UserDefaults.standard.double(forKey: "rating")
+        price = UserDefaults.standard.double(forKey: "price")
+        
+        radiusLabel.text = "\(radius!)mi"
+        radiusSlider.setValue(Float(radius!), animated: true)
+        radiusSlider.isContinuous = false
+        
+        ratingLabel.setTitle(getStarsForRating(rating: rating!), for: .normal)
+        ratingSlider.setValue(Float(rating!), animated: true)
+        ratingSlider.isContinuous = false
+        
+        priceLabel.setTitle(getQuoteForPrice(price: Int(price!)), for: .normal)
+        priceSlider.setValue(Float(price!), animated: true)
+        priceSlider.isContinuous = false
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        
+        //  Write settings to defaults so they can be loaded later
+        //
+        UserDefaults.standard.set(radius, forKey: "radius")
+        UserDefaults.standard.set(rating, forKey: "rating")
+        UserDefaults.standard.set(price, forKey: "price")
+        UserDefaults.standard.synchronize()
+    }
+    
     @IBAction func radiusSlider(_ sender: UISlider) {
         radiusLabel.text = "\(Int(sender.value))mi"
         radius = Int(sender.value)
@@ -37,52 +71,61 @@ class FilterViewController: UIViewController {
         NotificationCenter.default.post(name: name.name, object: sender)
     }
     
-
     @IBAction func ratingSlider(_ sender: UISlider) {
         
-        var rating = ""
-
-        switch sender.value {
-            
-            case 0.0..<1.0:
-                rating = "★"
-                break
-            case 1.0..<2.0:
-                rating = "★★"
-                break
-            case 2.0..<3.0:
-                rating = "★★★"
-                break
-            case 3.0..<4.0:
-                rating = "★★★★"
-                break
-            case 4.0...5.0:
-                rating = "★★★★★"
-                break
-            default:
-                break
-        }
+        var rating = getStarsForRating(rating: Double(sender.value))
         
         if ratingLabel.titleLabel?.text != rating {
             ratingLabel.setTitle(rating, for: .normal)
             self.rating = Double(sender.value)
+            let rating = Notification(name: Notification.Name(rawValue: "updateRating"))
+            NotificationCenter.default.post(name: rating.name, object: sender)
         }
     }
     
     
     @IBAction func priceSlider(_ sender: UISlider) {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        priceLabel.titleLabel?.text = formatter.string(from: NSNumber(value: sender.value))
-        price = Double(sender.value)
+
+        let price = getQuoteForPrice(price: Int(sender.value))
+
+        priceLabel.setTitle(price, for: .normal)
+        let priceValue = Notification(name: Notification.Name(rawValue: "updatePrice"))
+        NotificationCenter.default.post(name: priceValue.name, object: sender)
     }
     
-    // MARK: - Navigation
-
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-    }
+    //  MARK: Helper Functions
  
-
+    func getStarsForRating(rating : Double) -> String {
+        switch rating {
+        case 0.0..<1.0:
+            return "★"
+        case 1.0..<2.0:
+            return "★★"
+        case 2.0..<3.0:
+            return "★★★"
+        case 3.0..<4.0:
+            return "★★★★"
+        case 4.0...5.0:
+            return "★★★★★"
+        default:
+            return ""
+        }
+    }
+    
+    func getQuoteForPrice(price : Int) -> String {
+        switch Double(price) {
+        case 1:
+            return "Free"
+        case 2:
+            return "Inexpensive"
+        case 3:
+            return "Moderate"
+        case 4:
+            return "Expensive"
+        case 5:
+            return "Very Expensive"
+        default:
+            return ""
+        }
+    }
 }

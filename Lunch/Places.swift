@@ -18,12 +18,13 @@ struct Restaurant {
     var long : Double
     var icon : URL
     var rating : Double?
+    var priceLevel : Int?
     var distanceFromSelectedPlaceInMiles : Double?
     var vicinity : String?
     
     static func searchNearby(options: [String:Any], success: @escaping ([Restaurant]) -> Void, failure: @escaping (Error, String) -> Void) {
         
-        let url = URL(string: "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=\(options["latitude"]!),\(options["longitude"]!)&radius=\(options["radius"]!)&type=restaurant&key=\(Constants.placesSdkKey)")
+        let url = URL(string: "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=\(options["latitude"]!),\(options["longitude"]!)&radius=\(options["radius"]!)&type=restaurant&key=\(Constants.placesSdkKey)&minprice&maxprice")
         
         var request = URLRequest(url: url!)
         request.httpMethod = "GET"
@@ -66,9 +67,15 @@ struct Restaurant {
                     if let placeRating = place["rating"] as? Double {
                         rating = placeRating
                     }
+                    
+                    var priceLevel = -1
+                    if let price = place["price_level"] as? Int {
+                        priceLevel = price
+                    }
+                    
                     let vicinity = place["vicinity"] as! String
                     
-                    let restaurant = Restaurant(id: id, placeId: placeId, name: name, lat: locationLat, long: locationLong, icon: URL(string: icon)!, rating: rating, distanceFromSelectedPlaceInMiles: 0.0, vicinity: vicinity)
+                    let restaurant = Restaurant(id: id, placeId: placeId, name: name, lat: locationLat, long: locationLong, icon: URL(string: icon)!, rating: rating, priceLevel: priceLevel, distanceFromSelectedPlaceInMiles: 0.0, vicinity: vicinity)
                     restaurants.append(restaurant)
                 }
                 

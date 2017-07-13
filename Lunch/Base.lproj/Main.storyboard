@@ -369,13 +369,13 @@
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" contentHorizontalAlignment="right" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Hhj-7p-mZZ">
-                                        <rect key="frame" x="283" y="99.5" width="60" height="39"/>
+                                        <rect key="frame" x="303" y="99.5" width="40" height="39"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="22"/>
-                                        <state key="normal" title="★★★">
+                                        <state key="normal" title="★★">
                                             <color key="titleColor" red="0.90588235855102539" green="0.90588235855102539" blue="0.90588235855102539" alpha="1" colorSpace="calibratedRGB"/>
                                         </state>
                                     </button>
-                                    <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="3" minValue="1" maxValue="5" translatesAutoresizingMaskIntoConstraints="NO" id="haj-eX-Hgg">
+                                    <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="2.5" minValue="0.0" maxValue="5" translatesAutoresizingMaskIntoConstraints="NO" id="haj-eX-Hgg">
                                         <rect key="frame" x="18" y="138" width="323" height="31"/>
                                         <color key="minimumTrackTintColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                                         <color key="maximumTrackTintColor" red="0.17254902422428131" green="0.24313725531101227" blue="0.31372550129890442" alpha="1" colorSpace="calibratedRGB"/>
@@ -390,13 +390,13 @@
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" contentHorizontalAlignment="right" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="LXe-gB-eJC">
-                                        <rect key="frame" x="313" y="168" width="30" height="38"/>
+                                        <rect key="frame" x="252" y="168" width="91" height="38"/>
                                         <fontDescription key="fontDescription" name="HelveticaNeue-Light" family="Helvetica Neue" pointSize="22"/>
-                                        <state key="normal" title="$$">
+                                        <state key="normal" title="Moderate">
                                             <color key="titleColor" red="0.90588235855102539" green="0.90588235855102539" blue="0.90588235855102539" alpha="1" colorSpace="calibratedRGB"/>
                                         </state>
                                     </button>
-                                    <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="2" minValue="0.0" maxValue="4" translatesAutoresizingMaskIntoConstraints="NO" id="fbV-Uj-Mpx">
+                                    <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="3" minValue="1" maxValue="5" translatesAutoresizingMaskIntoConstraints="NO" id="fbV-Uj-Mpx">
                                         <rect key="frame" x="18" y="206" width="323" height="31"/>
                                         <color key="minimumTrackTintColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                                         <color key="maximumTrackTintColor" red="0.17254902422428131" green="0.24313725531101227" blue="0.31372550129890442" alpha="1" colorSpace="calibratedRGB"/>
@@ -475,8 +475,11 @@
                     <connections>
                         <outlet property="enclosingView" destination="RRH-Fp-K9O" id="2SR-g6-fqR"/>
                         <outlet property="priceLabel" destination="LXe-gB-eJC" id="syx-qg-7Zs"/>
+                        <outlet property="priceSlider" destination="fbV-Uj-Mpx" id="v8E-Y9-GqE"/>
                         <outlet property="radiusLabel" destination="1VR-7q-iEy" id="YL5-FV-uDW"/>
+                        <outlet property="radiusSlider" destination="l9b-5X-Ssk" id="cxs-ov-3pW"/>
                         <outlet property="ratingLabel" destination="Hhj-7p-mZZ" id="3Rw-jK-2xy"/>
+                        <outlet property="ratingSlider" destination="haj-eX-Hgg" id="d76-4D-T3r"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="7ls-nz-Oaz" userLabel="First Responder" sceneMemberID="firstResponder"/>

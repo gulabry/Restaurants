@@ -42,27 +42,28 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
     @IBOutlet weak var tableViewTopLayout: NSLayoutConstraint!
     var tableViewTopLayoutDefault : CGFloat?
     
-    var mapScaleFactor : Double = 14.0 {
+    var mapScaleFactor : Double = 13.5 {
         didSet {
-            mapView.animate(toZoom: Float(mapScaleFactor))
+            //mapView.animate(toZoom: Float(mapScaleFactor))
         }
     }
     
-    var desiredRadius : Int = 10 {
+    var desiredRadius : Int = 15 {
         didSet {
-            mapScaleFactor = 15.0 + (Double(desiredRadius) * -0.10)
+            //mapScaleFactor = 15.0 + (Double(desiredRadius) * -0.10)
+            filterRestaruantsByOptions()
         }
     }
     
     var desiredRating : Double = 3.0 {
         didSet {
-            
+            filterRestaruantsByOptions()
         }
     }
     
     var desiredPrice : Int = 2 {
         didSet {
-            
+            filterRestaruantsByOptions()
         }
     }
     
@@ -91,8 +92,21 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
     }
     
     func filterRestaruantsByOptions() {
+        filteredRestaurants.removeAll()
+        mapView.clear()
         for restaurant in nearbyRestaurants {
-            let price = restaurant
+            if let price = restaurant.priceLevel {
+                if let rating = restaurant.rating {
+                    if let radius = restaurant.distanceFromSelectedPlaceInMiles {
+                        if price <= desiredPrice && rating >= desiredRating && radius <= Double(desiredRadius) {
+                            filteredRestaurants.append(restaurant)
+                        }
+                    }
+                }
+            }
+        }
+        if filteredRestaurants.count > 0 {
+            showNearbyRestaurantsOnMap(restaurants: filteredRestaurants)
         }
     }
     
@@ -275,17 +289,18 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
             resultMarkers.append(marker)
         }
         
-        //  Add selected address to map
-        //
-        let position = CLLocationCoordinate2D(latitude: (self.selectedPlace?.coordinate.latitude)!, longitude: (self.selectedPlace?.coordinate.longitude)!)
-        let marker = GMSMarker(position: position)
-        marker.icon = GMSMarker.markerImage(with: .blue)
-        marker.title = self.selectedPlace?.name
-        marker.appearAnimation = .pop
-        marker.map = self.mapView
-        resultMarkers.append(marker)
-        
         DispatchQueue.main.async {
+            
+            //  Add selected address to map
+            //
+            let position = CLLocationCoordinate2D(latitude: (self.selectedPlace?.coordinate.latitude)!, longitude: (self.selectedPlace?.coordinate.longitude)!)
+            let marker = GMSMarker(position: position)
+            marker.icon = GMSMarker.markerImage(with: .blue)
+            marker.title = self.selectedPlace?.name
+            marker.appearAnimation = .pop
+            marker.map = self.mapView
+            self.resultMarkers.append(marker)
+            
             self.mapView.selectedMarker = marker
             self.mapView.animate(with: GMSCameraUpdate.fit(boundsRegion, withPadding: 10))
             
@@ -340,11 +355,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
             let newHeight = self.view.frame.height - buttonOffset + 20
             
             self.tableView.rowHeight = 85
-
             self.tableViewTopLayout.constant = buttonOffset
             self.tableViewHeight.constant = newHeight - 20
-            //self.tableView.frame = CGRect(x: newFrame.origin.x, y: newY, width: newFrame.width, height: newHeight)
-            
             self.tableView.reloadData()
         }
     }
@@ -508,7 +520,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
             let options = [
                 "latitude": place!.coordinate.latitude,
                 "longitude": place!.coordinate.longitude,
-                "radius": Int(1609 * self.desiredRadius) // Miles to METERS
+                "radius": Int(Double(self.desiredRadius) * 1609.34) // Miles to METERS
             ] as [String : Any]
             
             Restaurant.searchNearby(options: options, success: { (restaurants) in
@@ -564,8 +576,22 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
         
         let filter = GMSAutocompleteFilter()
         filter.type = .noFilter
+
+        //build bounds with location as center
+        //
+        let halfDistance = (Double(desiredRadius) * 1609.34) / 2
         
-        placesClient.autocompleteQuery(query, bounds: nil, filter: filter, callback: {(results, error) -> Void in
+        var origin = currentLocation?.coordinate
+        
+        if let _ = selectedPlace {
+            origin = selectedPlace?.coordinate
+        }
+        
+        let southwestCoord = locationWithBearing(bearing: 225, distanceMeters: halfDistance, origin: origin!)
+        let northeastCoord = locationWithBearing(bearing: 45, distanceMeters: halfDistance, origin: origin!)
+        let distanceFilter = GMSCoordinateBounds(coordinate: southwestCoord, coordinate: northeastCoord)
+        
+        placesClient.autocompleteQuery(query, bounds: distanceFilter, filter: filter, callback: {(results, error) -> Void in
             if let error = error {
                 print("Autocomplete error \(error)")
                 return
@@ -603,6 +629,10 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDataSour
     
     @IBAction func dismissToMap(segue : UIStoryboardSegue) {
         print("back to map")
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 }
 
@@ -650,6 +680,20 @@ extension ViewController: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         locationManager.stopUpdatingLocation()
         print("Error: \(error)")
+    }
+    
+    func locationWithBearing(bearing:Double, distanceMeters:Double, origin:CLLocationCoordinate2D) -> CLLocationCoordinate2D {
+        let distRadians = distanceMeters / (6372797.6)
+        
+        let rbearing = bearing * .pi / 180.0
+        
+        let lat1 = origin.latitude * .pi / 180
+        let lon1 = origin.longitude * .pi / 180
+        
+        let lat2 = asin(sin(lat1) * cos(distRadians) + cos(lat1) * sin(distRadians) * cos(rbearing))
+        let lon2 = lon1 + atan2(sin(rbearing) * sin(distRadians) * cos(lat1), cos(distRadians) - sin(lat1) * sin(lat2))
+        
+        return CLLocationCoordinate2D(latitude: lat2 * 180 / .pi, longitude: lon2 * 180 / .pi)
     }
 }
 
